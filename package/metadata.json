@@ -1,0 +1,27 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "madf@madf.info",
+                "Name": "Maksym Mamontov"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "A widget showing simple hardware meters.",
+        "EnabledByDefault": true,
+        "FormFactors": [
+            "desktop"
+        ],
+        "Icon": "dashboard-show",
+        "Id": "com.github.madf.minidashboard",
+        "Name": "Mini Dashboard",
+        "ServiceTypes": [
+            "Plasma/Applet"
+        ],
+        "Version": "1.0",
+        "Website": "https://github.com/madf/minidashboard"
+    },
+    "X-Plasma-API": "declarativeappletscript",
+    "X-Plasma-MainScript": "ui/main.qml",
+    "KPackageStructure": "Plasma/Applet"
+}
