@@ -8,28 +8,52 @@ import "sensorFuncs.js" as SensorFuncs
 
 Row {
     property var sensorGroups: [
-        {name: "CPU:", unit: "%", source: "cpuUsage"},
-        {name: "CPU:", unit: "°C", source: "/sys/class/hwmon/hwmon0/temp1_input", divisor: 1000},
-        {name: "Bat:", unit: "°C", source: "/sys/class/hwmon/hwmon1/temp1_input", divisor: 1000},
-        {name: "GPU:", unit: "°C", source: "/sys/class/hwmon/hwmon2/temp1_input", divisor: 1000},
-        {name: "Mem:", unit: "%", source: "memUsage"}
+        {name: "CPU:", type: "cpuUsage"},
+        {name: "CPU:", type: "custom", unit: "°C", source: "/sys/class/hwmon/hwmon1/temp1_input", divisor: 1000},
+        {name: "Bat:", type: "custom", unit: "°C", source: "/sys/class/hwmon/hwmon3/temp1_input", divisor: 1000},
+        {name: "GPU:", type: "custom", unit: "°C", source: "/sys/class/hwmon/hwmon5/temp1_input", divisor: 1000},
+        {name: "Mem:", type: "memUsage"}
     ]
 
     Plasmoid.preferredRepresentation: Plasmoid.fullRepresentation
 
     spacing: 10
 
+    Component {
+        id: cpuUsageSensor
+        CPUUsageSensor {
+        }
+    }
+
+    Component {
+        id: memUsageSensor
+        MemUsageSensor {
+        }
+    }
+
+    Component {
+        id: genericSensor
+        Sensor {
+        }
+    }
+
     Repeater {
         model: parent.sensorGroups
 
-        delegate: Sensor {
-            name: modelData.name
-            unit: modelData.unit
-            divisor: modelData.divisor ? modelData.divisor : 1
-            precision: modelData.precision ? modelData.precision : 1
-            source: modelData.source
-
-            Component.onCompleted: update()
+        delegate: Loader {
+            sourceComponent: {
+                if (modelData.type === "cpuUsage") {
+                    return cpuUsageSensor
+                }
+                if (modelData.type === "memUsage") {
+                    return memUsageSensor
+                }
+                return genericSensor
+            }
+            onLoaded: {
+                item.model = modelData
+                item.update()
+            }
         }
     }
 

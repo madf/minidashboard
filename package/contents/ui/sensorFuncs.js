@@ -1,16 +1,48 @@
+function parseCPUValues(line)
+{
+  const vals = line.split(/\s+/);
+  return {
+    user: vals[1],
+    nice: vals[2],
+    system: vals[3],
+    idle: vals[4],
+    iowait: vals[5]
+  }
+}
+
 function calcCPUUsage(old) {
   const line = readFile("/proc/stat").split("\n")[0]
-  const diffs = {
-    user:
-    nice:
-    system:
-    idle:
-    iowait:
+  const values = parseCPUValues(line)
+  if (typeof old === "undefined") {
+    return {
+      values: values,
+      usage: 0
+    }
+  }
+  let diffs = {
+    user: values.user - old.user,
+    nice: values.nice - old.nice,
+    system: values.system - old.system,
+    idle: values.idle - old.idle,
+    iowait: values.iowait - old.iowait
+  }
+  const sum = diffs.user + diffs.nice +
+              diffs.system + diffs.idle +
+              diffs.iowait
+  const usage = Math.round((diffs.user / sum + diffs.nice / sum + diffs.system / sum) * 100)
+  return {
+    values: values,
+    usage: usage
   }
 }
 
 function calcMemUsage() {
-  return 71
+  const lines = readFile("/proc/meminfo").split("\n")
+  const vals = lines.reduce((a, l) => { const kv = l.split(/\s+/); a[kv[0]] = parseInt(kv[1]); return a; }, {})
+  let available = vals["MemAvailable:"]
+  if (typeof available === "undefined")
+    available = vals["MemFree:"] + vals["Cached:"] + vals["Buffers:"]
+  return Math.round(available / vals["MemTotal:"] * 100)
 }
 
 function composeItem(i) {

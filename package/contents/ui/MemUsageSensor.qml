@@ -11,20 +11,24 @@ PlasmaComponents.Label {
     text: renderValue(value)
 
     function update() {
-        value = parseFloat(SensorFuncs.readFile(model.source))
+        value = SensorFuncs.calcMemUsage()
     }
 
     function renderValue(v) {
-        let precision = 1
-        if (typeof model.precision !== "undefined")
-            precision = model.precision
         if (typeof v !== "undefined")
-            return model.name + " " + (v / model.divisor).toFixed(precision) + model.unit
+            return model.name + " " + v + "%"
         return model.name + " -"
     }
 
     Timer {
-        interval: parent.model.interval * 1000
+        function calcInterval(m) {
+            if (!m)
+                return 1000
+            if (typeof m.interval === "undefined")
+                return 1000
+            return m.interval * 1000
+        }
+        interval: calcInterval(parent.model)
         running: true
         repeat: true
         onTriggered: {
