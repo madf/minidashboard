@@ -4,6 +4,12 @@ import QtQuick.Layouts 1.15
 
 QQC2.Dialog {
     property string type
+    property alias name: sensorName.text
+    property alias path: sensorPath.text
+    property alias unit: sensorUnit.text
+    property alias divisor: sensorDivisor.text
+    property alias precision: sensorPrecision.text
+    property alias interval: sensorInterval.text
 
     title: "Add sensor"
     standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel

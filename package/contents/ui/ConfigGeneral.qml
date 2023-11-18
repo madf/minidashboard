@@ -14,14 +14,14 @@ ColumnLayout {
     property var cfg_sensorList: []
 
     function addSensor(object) {
-        sensorModel.append( object )
+        sensorModel.appendRow( object )
         cfg_sensorList.push( JSON.stringify(object) )
         configurationChanged();
     }
 
     function removeSensor(index) {
         if(sensorModel.count > 0) {
-            sensorModel.remove(index)
+            sensorModel.removeRow(index, 1)
             cfg_sensorList.splice(index,1)
             configurationChanged();
         }
@@ -39,10 +39,27 @@ ColumnLayout {
     SensorDialog {
         id: sensorDialog
         visible: false
+
+        onAccepted: addSensor({type: type, name: name})
     }
 
-    ListModel {
+    SimpleDialog {
+        id: simpleDialog
+        visible: false
+
+        onAccepted: addSensor({type: type, name: name})
+    }
+
+    TableModel {
         id: sensorModel
+
+        TableModelColumn { display: "Tame" }
+        TableModelColumn { display: "Name" }
+        TableModelColumn { display: "Path" }
+        TableModelColumn { display: "Unit" }
+        TableModelColumn { display: "Divisor" }
+        TableModelColumn { display: "Precision" }
+        TableModelColumn { display: "Interval" }
     }
 
     QQC2.ScrollView {
@@ -64,7 +81,7 @@ ColumnLayout {
 
                 QQC2.Label {
                     Layout.fillWidth: true
-                    text: model.sensor
+                    text: "Type: " + model.type + ", Name: " + model.name
                 }
 
                 actions: [
@@ -93,12 +110,12 @@ ColumnLayout {
 
                 QQC2.MenuItem {
                     text: "CPU usage, %"
-                    onTriggered: () => { sensorDialog.type = "cpuUsage"; sensorDialog.open() }
+                    onTriggered: () => { simpleDialog.type = "cpuUsage"; simpleDialog.open() }
                 }
 
                 QQC2.MenuItem {
                     text: "Mem usage, %"
-                    onTriggered: () => { sensorDialog.type = "memUsage"; sensorDialog.open() }
+                    onTriggered: () => { simpleDialog.type = "memUsage"; simpleDialog.open() }
                 }
 
                 QQC2.MenuItem {
