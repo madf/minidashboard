@@ -56,9 +56,4 @@ Row {
             }
         }
     }
-
-    PlasmaComponents.Label {
-        id: label
-        text: "CPU: 7% | CPU: +61.0°C, Bat: +29.0°C, GPU: +59.0°C | Mem: 71%"
-    }
 }

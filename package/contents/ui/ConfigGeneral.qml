@@ -1,5 +1,5 @@
-import QtQuick 2.5
-import QtQuick.Controls 2.5 as QQC2
+import QtQuick 2.15
+import QtQuick.Controls 2.15 as QQC2
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 
@@ -14,16 +14,40 @@ ColumnLayout {
     property var cfg_sensorList: []
 
     function addSensor(object) {
-        sensorModel.appendRow( object )
+        console.log("Add sensor " + JSON.stringify(object))
+        sensorModel.append( object )
         cfg_sensorList.push( JSON.stringify(object) )
         configurationChanged();
     }
 
     function removeSensor(index) {
         if(sensorModel.count > 0) {
-            sensorModel.removeRow(index, 1)
+            sensorModel.remove(index, 1)
             cfg_sensorList.splice(index,1)
             configurationChanged();
+        }
+    }
+
+    function setSensor(index, object) {
+        console.log("Set sensor " + JSON.stringify(object) + " at " + index)
+        sensorModel.set(index, object)
+    }
+
+    function renderSensor(object) {
+        if (object.type === "custom") {
+            return object.type + ", " + object.name + ", " + object.path + ", " + object.unit
+        } else {
+            return object.type + ", " + object.name + ", " + object.unit
+        }
+    }
+
+    function editSensor(index) {
+        const object = sensorModel.get(index)
+        console.log("At " + index + ": " + JSON.stringify(object))
+        if (object.type === "custom") {
+            sensorDialog.edit(index, object)
+        } else {
+            simpleDialog.edit(index, object)
         }
     }
 
@@ -40,26 +64,18 @@ ColumnLayout {
         id: sensorDialog
         visible: false
 
-        onAccepted: addSensor({type: type, name: name})
+        onDone: (index, object) => typeof index === "undefined" ? addSensor(object) : setSensor(index, object)
     }
 
     SimpleDialog {
         id: simpleDialog
         visible: false
 
-        onAccepted: addSensor({type: type, name: name})
+        onDone: (index, object) => typeof index === "undefined" ? addSensor(object) : setSensor(index, object)
     }
 
-    TableModel {
+    ListModel {
         id: sensorModel
-
-        TableModelColumn { display: "Tame" }
-        TableModelColumn { display: "Name" }
-        TableModelColumn { display: "Path" }
-        TableModelColumn { display: "Unit" }
-        TableModelColumn { display: "Divisor" }
-        TableModelColumn { display: "Precision" }
-        TableModelColumn { display: "Interval" }
     }
 
     QQC2.ScrollView {
@@ -81,13 +97,18 @@ ColumnLayout {
 
                 QQC2.Label {
                     Layout.fillWidth: true
-                    text: "Type: " + model.type + ", Name: " + model.name
+                    text: renderSensor(model)
                 }
 
                 actions: [
                     Kirigami.Action {
+                        iconName: "edit-entry"
+                        tooltip: i18nd("plasma_wallpaper_org.kde.image", "Edit sensor")
+                        onTriggered: editSensor(model.index)
+                    },
+                    Kirigami.Action {
                         iconName: "list-remove"
-                        tooltip: i18nd("plasma_wallpaper_org.kde.image", "Remove path")
+                        tooltip: i18nd("plasma_wallpaper_org.kde.image", "Remove sensor")
                         onTriggered: removeSensor(model.index)
                     }
                 ]
@@ -110,17 +131,17 @@ ColumnLayout {
 
                 QQC2.MenuItem {
                     text: "CPU usage, %"
-                    onTriggered: () => { simpleDialog.type = "cpuUsage"; simpleDialog.open() }
+                    onTriggered: () => { simpleDialog.add({type: "cpuUsage", name: "CPU Usage"}) }
                 }
 
                 QQC2.MenuItem {
                     text: "Mem usage, %"
-                    onTriggered: () => { simpleDialog.type = "memUsage"; simpleDialog.open() }
+                    onTriggered: () => { simpleDialog.add({type: "memUsage", name: "Mem Usage"}) }
                 }
 
                 QQC2.MenuItem {
                     text: "Custom"
-                    onTriggered: () => { sensorDialog.type = "custom"; sensorDialog.open() }
+                    onTriggered: () => { sensorDialog.add({type: "custom"}) }
                 }
             }
         }

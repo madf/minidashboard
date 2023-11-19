@@ -3,11 +3,38 @@ import QtQuick.Controls 2.5 as QQC2
 import QtQuick.Layouts 1.15
 
 QQC2.Dialog {
+    property var index
     property string type
-    property alias name: sensorName.text
+    property string name
+    property alias label: sensorLabel.text
     property alias interval: sensorInterval.text
 
-    title: "Add sensor"
+    signal done(int index, var object)
+
+    onAccepted: done(index, {type: type, name: name, label: label, path: "", unit: "%", divisor: 1000, precision: 0, interval: interval})
+
+    function add(object) {
+        console.log("Adding " + JSON.stringify(object))
+        index = undefined
+        type = object.type
+        name = object.name
+        label = ""
+        interval = 1
+        title = "Add sensor"
+        open()
+    }
+
+    function edit(i, object) {
+        console.log("Editing " + JSON.stringify(object) + " at " + index)
+        index = i
+        type = object.type
+        name = object.name
+        label = object.label
+        interval = object.interval
+        title = "Edit sensor"
+        open()
+    }
+
     standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
 
     GridLayout {
@@ -18,15 +45,24 @@ QQC2.Dialog {
         columnSpacing: 10
 
         QQC2.Label {
-            Layout.rowSpan: 2
-            text: "Type: " + type
+            text: "Type:"
+        }
+        QQC2.Label {
+            text: type
         }
 
         QQC2.Label {
             text: "Name:"
         }
+        QQC2.Label {
+            text: name
+        }
+
+        QQC2.Label {
+            text: "Label:"
+        }
         QQC2.TextField {
-            id: sensorName
+            id: sensorLabel
             Layout.fillWidth: true
         }
 
@@ -37,6 +73,7 @@ QQC2.Dialog {
             id: sensorInterval
             text: "1"
             Layout.fillWidth: true
+            validator: IntValidator { bottom: 1 }
         }
     }
 }
